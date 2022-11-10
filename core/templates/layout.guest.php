@@ -35,7 +35,7 @@
 				<?php if ($_['bodyid'] === 'body-login'): ?>
 					<header role="banner">
 						<div id="header">
-							<div class="logo"></div>
+							<img class="logo" alt="<?php p($l->t('%s logo', [$theme->getName()])); ?>" src="<?= $_['logoUrl'].$theme->getLogo(); ?>">
 						</div>
 					</header>
 				<?php endif; ?>
