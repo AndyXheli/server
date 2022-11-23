@@ -140,6 +140,7 @@ class Hooks implements IEventListener {
 	public function remove_hook(Node $node): void {
 		$path = $this->userFolder->getRelativePath($node->getPath());
 		Storage::delete($path);
+		$this->versionsMapper->deleteAllVersionsForFileId($node->getId());
 	}
 
 	/**
