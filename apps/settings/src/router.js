@@ -64,14 +64,13 @@ const router = new Router({
 					name: 'group',
 					meta: {
 						title: (to) => {
-							if (to.params.selectedGroup === 'admin' ) {
+							if (to.params.selectedGroup === 'admin') {
 								return t('settings', 'Admins')
 							} else if (to.params.selectedGroup === 'disabled') {
 								return t('settings', 'Disabled users')
-							} else {
-								return decodeURIComponent(to.params.selectedGroup)
 							}
-						}
+							return decodeURIComponent(to.params.selectedGroup)
+						},
 					},
 					component: Users,
 				},
@@ -103,7 +102,7 @@ const router = new Router({
 router.afterEach(async (to) => {
 	const metaTitle = await to.meta.title?.(to)
 	if (metaTitle) {
-		document.title = metaTitle + ` - ${baseTitle}`
+		document.title = `${metaTitle} - ${baseTitle}`
 	} else {
 		document.title = baseTitle
 	}
