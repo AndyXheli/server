@@ -217,6 +217,13 @@ export default {
 				return this.version.preview
 			}
 		},
+
+		/**
+		 * @return {string}
+		 */
+		formattedDate() {
+			return moment(this.version.mtime).format('LLL')
+		},
 	},
 	methods: {
 		openVersionLabelModal() {
@@ -238,10 +245,6 @@ export default {
 
 		deleteVersion() {
 			this.$emit('delete', this.version)
-		},
-
-		formattedDate() {
-			return moment(this.version.mtime)
 		},
 	},
 }
