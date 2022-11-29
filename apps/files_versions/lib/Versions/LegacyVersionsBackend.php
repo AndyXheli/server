@@ -41,7 +41,7 @@ use OCP\Files\Storage\IStorage;
 use OCP\IUser;
 use OCP\IUserManager;
 
-class LegacyVersionsBackend implements IVersionBackend, INameableVersionBackend {
+class LegacyVersionsBackend implements IVersionBackend, INameableVersionBackend, IDeletableVersionBackend {
 	/** @var IRootFolder */
 	private $rootFolder;
 	/** @var IUserManager */
@@ -184,5 +184,14 @@ class LegacyVersionsBackend implements IVersionBackend, INameableVersionBackend 
 		}
 		$versionEntity->setLabel($label ?? '');
 		$this->versionsMapper->update($versionEntity);
+	}
+
+	public function deleteVersion(IVersion $version): void {
+		Storage::deleteRevision($version->getVersionPath(), $version->getRevisionId());
+		$versionEntity = $this->versionsMapper->findVersionForFileId(
+			$version->getSourceFile()->getId(),
+			$version->getTimestamp(),
+		);
+		$this->versionsMapper->delete($versionEntity);
 	}
 }

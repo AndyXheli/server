@@ -61,7 +61,7 @@
 					</template>
 					{{ t('files_versions', 'Download version') }}
 				</NcActionLink>
-				<NcActionButton v-if="!isCurrent"
+				<NcActionButton v-if="!isCurrent && capabilities.files.version_deletion === true"
 					:close-after-click="true"
 					@click="deleteVersion">
 					<template #icon>
@@ -174,7 +174,7 @@ export default {
 		return {
 			showVersionLabelForm: false,
 			formVersionLabelValue: this.version.label,
-			capabilities: loadState('core', 'capabilities', { files: { version_labeling: false } }),
+			capabilities: loadState('core', 'capabilities', { files: { version_labeling: false, version_deletion: false } }),
 		}
 	},
 	computed: {
