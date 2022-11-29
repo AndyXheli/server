@@ -28,25 +28,34 @@ namespace OCA\Files_Versions\Versions;
 
 use OC\Files\View;
 use OCA\Files_Sharing\SharedStorage;
+use OCA\Files_Versions\Db\VersionEntity;
+use OCA\Files_Versions\Db\VersionsMapper;
 use OCA\Files_Versions\Storage;
 use OCP\Files\File;
 use OCP\Files\FileInfo;
 use OCP\Files\Folder;
 use OCP\Files\IRootFolder;
+use OCP\Files\Node;
 use OCP\Files\NotFoundException;
 use OCP\Files\Storage\IStorage;
 use OCP\IUser;
 use OCP\IUserManager;
 
-class LegacyVersionsBackend implements IVersionBackend {
+class LegacyVersionsBackend implements IVersionBackend, INameableVersionBackend {
 	/** @var IRootFolder */
 	private $rootFolder;
 	/** @var IUserManager */
 	private $userManager;
+	private VersionsMapper $versionsMapper;
 
-	public function __construct(IRootFolder $rootFolder, IUserManager $userManager) {
+	public function __construct(
+		IRootFolder $rootFolder,
+		IUserManager $userManager,
+		VersionsMapper $versionsMapper
+	) {
 		$this->rootFolder = $rootFolder;
 		$this->userManager = $userManager;
+		$this->versionsMapper = $versionsMapper;
 	}
 
 	public function useBackendForStorage(IStorage $storage): bool {
@@ -63,21 +72,60 @@ class LegacyVersionsBackend implements IVersionBackend {
 		$userFolder = $this->rootFolder->getUserFolder($user->getUID());
 		$nodes = $userFolder->getById($file->getId());
 		$file2 = array_pop($nodes);
-		$versions = Storage::getVersions($user->getUID(), $userFolder->getRelativePath($file2->getPath()));
 
-		return array_map(function (array $data) use ($file, $user) {
-			return new Version(
-				(int)$data['version'],
-				(int)$data['version'],
-				$data['name'],
-				(int)$data['size'],
-				$data['mimetype'],
-				$data['path'],
+		$versions = $this->getVersionsForFileFromDB($file2, $user);
+
+		if (count($versions) > 0) {
+			return $versions;
+		}
+
+		// Insert the entry in the DB for the current version.
+		if ($file2->getSize() > 0) {
+			$versionEntity = new VersionEntity();
+			$versionEntity->setFileId($file2->getId());
+			$versionEntity->setTimestamp($file2->getMTime());
+			$versionEntity->setSize($file2->getSize());
+			$versionEntity->setMimetype($file2->getMimetype());
+			$versionEntity->setMetadata([]);
+			$this->versionsMapper->insert($versionEntity);
+		}
+
+		// Insert entries in the DB for existing versions.
+		$versionsOnFS = Storage::getVersions($user->getUID(), $userFolder->getRelativePath($file2->getPath()));
+		foreach ($versionsOnFS as $version) {
+			$versionEntity = new VersionEntity();
+			$versionEntity->setFileId($file2->getId());
+			$versionEntity->setTimestamp((int)$version['version']);
+			$versionEntity->setSize((int)$version['size']);
+			$versionEntity->setMimetype($version['mimetype']);
+			$versionEntity->setMetadata([]);
+			$this->versionsMapper->insert($versionEntity);
+		}
+
+		return $this->getVersionsForFileFromDB($file2, $user);
+	}
+
+	/**
+	 * @return IVersion[]
+	 */
+	private function getVersionsForFileFromDB(Node $file, IUser $user): array {
+		$userFolder = $this->rootFolder->getUserFolder($user->getUID());
+
+		return array_map(
+			fn (VersionEntity $versionEntity) => new Version(
+				$versionEntity->getTimestamp(),
+				$versionEntity->getTimestamp(),
+				$file->getName(),
+				$versionEntity->getSize(),
+				$versionEntity->getMimetype(),
+				$userFolder->getRelativePath($file->getPath()),
 				$file,
 				$this,
-				$user
-			);
-		}, $versions);
+				$user,
+				$versionEntity->getLabel(),
+			),
+			$this->versionsMapper->findAllVersionsForFileId($file->getId())
+		);
 	}
 
 	public function createVersion(IUser $user, FileInfo $file) {
@@ -124,5 +172,17 @@ class LegacyVersionsBackend implements IVersionBackend {
 		/** @var File $file */
 		$file = $versionFolder->get($userFolder->getRelativePath($sourceFile->getPath()) . '.v' . $revision);
 		return $file;
+	}
+
+	public function setVersionLabel(IVersion $version, string $label): void {
+		$versionEntity = $this->versionsMapper->findVersionForFileId(
+			$version->getSourceFile()->getId(),
+			$version->getTimestamp(),
+		);
+		if (trim($label) === '') {
+			$label = null;
+		}
+		$versionEntity->setLabel($label ?? '');
+		$this->versionsMapper->update($versionEntity);
 	}
 }
