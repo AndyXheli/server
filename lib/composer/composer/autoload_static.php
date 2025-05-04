@@ -250,6 +250,7 @@ class ComposerStaticInit749170dad3f5e7f9ca158f5a9f04f6a2
         'OCP\\Calendar\\ICalendarProvider' => __DIR__ . '/../../..' . '/lib/public/Calendar/ICalendarProvider.php',
         'OCP\\Calendar\\ICalendarQuery' => __DIR__ . '/../../..' . '/lib/public/Calendar/ICalendarQuery.php',
         'OCP\\Calendar\\ICreateFromString' => __DIR__ . '/../../..' . '/lib/public/Calendar/ICreateFromString.php',
+        'OCP\\Calendar\\IHandleImip' => __DIR__ . '/../../..' . '/lib/public/Calendar/IHandleImip.php',
         'OCP\\Calendar\\IHandleImipMessage' => __DIR__ . '/../../..' . '/lib/public/Calendar/IHandleImipMessage.php',
         'OCP\\Calendar\\IManager' => __DIR__ . '/../../..' . '/lib/public/Calendar/IManager.php',
         'OCP\\Calendar\\IMetadataProvider' => __DIR__ . '/../../..' . '/lib/public/Calendar/IMetadataProvider.php',
