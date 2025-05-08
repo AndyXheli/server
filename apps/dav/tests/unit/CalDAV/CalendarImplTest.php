@@ -21,21 +21,13 @@ use Sabre\VObject\ITip\Message;
 use Sabre\VObject\Reader;
 
 class CalendarImplTest extends \Test\TestCase {
-<<<<<<< HEAD
-
-	private Calendar|MockObject $calendar;
-	private array $calendarInfo;
-	private CalDavBackend|MockObject $backend;
-	private CalendarImpl|MockObject $calendarImpl;
-	private array $mockExportCollection;
-=======
 	
 	private CalDavBackend|MockObject $backend;
 	private Calendar|MockObject $calendar;
 	private CalendarImpl|MockObject $calendarImpl;
+	private array $mockExportCollection;
 	private array $calendarInfo;
 	private VCalendar $vCalendar1a;
->>>>>>> 6402015c6b5 (fix: aliases and capitalization of emails)
 
 	protected function setUp(): void {
 		parent::setUp();
@@ -49,15 +41,11 @@ class CalendarImplTest extends \Test\TestCase {
 			'uri' => '/this/is/a/uri',
 			'principaluri' => 'principal/users/foobar'
 		];
-		$this->calendarImpl = new CalendarImpl($this->calendar, $this->calendarInfo, $this->backend);
-
-<<<<<<< HEAD
 		$this->calendarImpl = new CalendarImpl(
 			$this->calendar,
 			$this->calendarInfo,
 			$this->backend
 		);
-=======
 		// construct calendar with a 1 hour event and same start/end time zones
 		$this->vCalendar1a = new VCalendar();
 		/** @var VEvent $vEvent */
@@ -75,7 +63,6 @@ class CalendarImplTest extends \Test\TestCase {
 			'ROLE' => 'REQ-PARTICIPANT',
 			'RSVP' => 'TRUE'
 		]);
->>>>>>> 6402015c6b5 (fix: aliases and capitalization of emails)
 	}
 
 
@@ -420,7 +407,6 @@ class CalendarImplTest extends \Test\TestCase {
 		$calendarImpl->handleIMip($vObject);
 	}
 
-<<<<<<< HEAD
 	protected function mockExportGenerator(): Generator {
 		foreach ($this->mockExportCollection as $entry) {
 			yield $entry;
@@ -464,6 +450,4 @@ class CalendarImplTest extends \Test\TestCase {
 		$this->assertCount(1, $exported, 'Invalid exported items count');
 	}
 
-=======
->>>>>>> 6402015c6b5 (fix: aliases and capitalization of emails)
 }
